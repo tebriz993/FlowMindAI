@@ -200,12 +200,13 @@ FlowMindAI/
 
 ## License
 
-This project is proprietary software developed by Tabriz Latifov.
+This project is proprietary software developed by Crocusoft MMC.
 
 ## Support
 
 For support and questions:
-- Email: latifovtebriz@gmail.com
+- Email: tabrizl@crocusoft.com
+- Company: Crocusoft MMC
 
 ---
 
