@@ -9,7 +9,12 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
+  name: text("name"), // Full name for display
   hashedPassword: text("hashed_password"),
+  role: text("role").default("employee"), // admin, hr, it, manager, employee
+  department: text("department"), // Department name
+  deptId: varchar("dept_id"), // Department ID reference
+  authProvider: text("auth_provider").default("local"), // local, google, etc
   isVerified: boolean("is_verified").default(false),
   verificationToken: text("verification_token").unique(),
   tokenExpiry: timestamp("token_expiry"),
@@ -103,6 +108,7 @@ export const tickets = pgTable("tickets", {
   deptId: varchar("dept_id").references(() => departments.id),
   subject: text("subject").notNull(),
   body: text("body").notNull(),
+  description: text("description"), // Additional description field
   status: text("status").notNull(), // 'open', 'in_progress', 'resolved', 'closed'
   priority: text("priority").notNull(), // 'low', 'medium', 'high', 'critical'
   assigneeId: varchar("assignee_id").references(() => users.id),
@@ -386,6 +392,15 @@ export const emailCheckSchema = z.object({
   email: z.string().email("Valid email address is required"),
 });
 
+export const registerSchema = z.object({
+  email: z.string().email("Valid email is required"),
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  role: z.enum(["admin", "hr", "it", "manager", "employee"]).default("employee"),
+  department: z.string().optional(),
+});
+
 export const completeRegistrationSchema = z.object({
   email: z.string().email(),
   firstName: z.string().min(1, "First name is required"),
@@ -410,6 +425,7 @@ export const inviteUserSchema = z.object({
 });
 
 export type EmailCheckInput = z.infer<typeof emailCheckSchema>;
+export type RegisterInput = z.infer<typeof registerSchema>;
 export type CompleteRegistrationInput = z.infer<typeof completeRegistrationSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type InviteUserInput = z.infer<typeof inviteUserSchema>;
@@ -448,8 +464,8 @@ export const insertInvitationSchema = createInsertSchema(invitations).omit({
 
 // Types  
 export type User = typeof users.$inferSelect;
-export type UpsertUser = typeof users.$inferInsert;
 export type InsertUser = z.infer<typeof insertUserSchema>;
+export type UpsertUser = typeof users.$inferInsert;
 
 export type Workspace = typeof workspaces.$inferSelect;
 export type InsertWorkspace = z.infer<typeof insertWorkspaceSchema>;

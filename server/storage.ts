@@ -127,7 +127,6 @@ export class MemStorage implements IStorage {
   private routingRules: Map<string, RoutingRule> = new Map();
   private workflowTemplates: Map<string, WorkflowTemplate> = new Map();
   private integrations: Map<string, Integration> = new Map();
-  private notifications: Map<string, Notification> = new Map();
   private faqs: Map<string, FAQ> = new Map();
 
   constructor() {
@@ -562,31 +561,7 @@ export class MemStorage implements IStorage {
   }
 
   // Notifications
-  async getNotifications(userId: string): Promise<Notification[]> {
-    return Array.from(this.notifications.values()).filter(n => n.userId === userId);
-  }
 
-  async createNotification(notification: InsertNotification): Promise<Notification> {
-    const id = randomUUID();
-    const newNotification: Notification = { 
-      ...notification, 
-      userId: notification.userId ?? null,
-      isRead: notification.isRead ?? null,
-      actionUrl: notification.actionUrl ?? null,
-      id,
-      createdAt: new Date()
-    };
-    this.notifications.set(id, newNotification);
-    return newNotification;
-  }
-
-  async markNotificationRead(id: string): Promise<void> {
-    const notification = this.notifications.get(id);
-    if (notification) {
-      notification.isRead = true;
-      this.notifications.set(id, notification);
-    }
-  }
 }
 
 // DatabaseStorage implementation using Drizzle ORM
