@@ -216,6 +216,9 @@ export default function RegisterComplete() {
                           </Button>
                         </div>
                       </FormControl>
+                      <div className="text-xs text-gray-500 mt-2">
+                        Password must contain: uppercase, lowercase, number and special character
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}

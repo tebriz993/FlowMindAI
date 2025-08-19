@@ -25,7 +25,7 @@ export async function sendEmail(params: EmailParams): Promise<boolean> {
   try {
     await resend.emails.send({
       to: params.to,
-      from: params.from || 'FlowMindAI <no.reply.flowmind@gmail.com>',
+      from: params.from || 'FlowMindAI <noreply@flowmindai.com>',
       subject: params.subject,
       html: params.html,
     });

@@ -101,7 +101,7 @@ export default function RegisterEmail() {
                         <Input
                           {...field}
                           type="email"
-                          placeholder="john@example.com"
+                          placeholder="john@company.com"
                           className="h-12 text-lg"
                           data-testid="input-email"
                         />

@@ -15,7 +15,7 @@ import { Link } from "wouter";
 
 const loginSchema = z.object({
   email: z.string().email("Düzgün email daxil edin"),
-  password: z.string().min(6, "Şifrə ən azı 6 simvol olmalıdır"),
+  password: z.string().min(8, "Şifrə ən azı 8 simvol olmalıdır"),
 });
 
 type LoginInput = z.infer<typeof loginSchema>;
@@ -153,6 +153,12 @@ export default function Login() {
                 </Button>
               </form>
             </Form>
+
+            <div className="mt-4 text-center">
+              <Link href="/forgot-password" className="text-sm text-blue-600 hover:text-blue-700">
+                Şifrəni unutmusunuz?
+              </Link>
+            </div>
 
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600">

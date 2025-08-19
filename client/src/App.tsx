@@ -33,6 +33,7 @@ import UserDashboard from "@/pages/user-dashboard";
 import VerifyEmail from "@/pages/verify-email";
 import AuthVerify from "@/pages/auth-verify";
 import Login from "@/pages/login";
+import ResendVerification from "@/pages/resend-verification";
 import UserProfile from "@/components/user-profile";
 import Features from "@/pages/features";
 import About from "@/pages/about";
@@ -77,6 +78,7 @@ function Router() {
         <Route path="/auth" component={AuthPage} />
         <Route path="/auth/verify" component={AuthVerify} />
         <Route path="/verify-email" component={VerifyEmail} />
+        <Route path="/resend-verification" component={ResendVerification} />
         
         {/* Fallback */}
         <Route component={MarketingHome} />

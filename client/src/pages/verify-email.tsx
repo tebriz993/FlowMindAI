@@ -1,136 +1,139 @@
-import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'wouter';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, CheckCircle, XCircle, Bot } from 'lucide-react';
+import { useEffect, useState } from "react";
+import { useLocation } from "wouter";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { Bot, CheckCircle, XCircle, Mail, Loader2 } from "lucide-react";
+import { Link } from "wouter";
 
 export default function VerifyEmail() {
-  const [location] = useLocation();
-  const [loading, setLoading] = useState(true);
-  const [verified, setVerified] = useState(false);
-  const [error, setError] = useState('');
+  const [, navigate] = useLocation();
+  const { toast } = useToast();
+  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
     const verifyEmail = async () => {
-      // Extract token from URL
-      const urlParams = new URLSearchParams(window.location.search);
-      const token = urlParams.get('token');
-
-      if (!token) {
-        setError('No verification token provided.');
-        setLoading(false);
-        return;
-      }
-
       try {
-        const response = await fetch('/api/auth/verify-email', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ token })
-        });
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+
+        if (!token) {
+          setStatus('error');
+          setMessage('Verification token not found in URL');
+          return;
+        }
+
+        const response = await apiRequest(`/api/auth/verify-email?token=${token}`);
         const data = await response.json();
 
-        if (response.ok) {
-          setVerified(true);
-        } else {
-          setError(data.message || data.error || 'Email verification failed');
-        }
-      } catch (error) {
-        setError('Network error. Please try again.');
-      } finally {
-        setLoading(false);
+        setStatus('success');
+        setMessage(data.message || 'Email verified successfully!');
+        
+        toast({
+          title: "Email Verified!",
+          description: "Your account has been activated. You can now sign in.",
+        });
+
+        // Redirect to login after 3 seconds
+        setTimeout(() => {
+          navigate('/login');
+        }, 3000);
+
+      } catch (error: any) {
+        setStatus('error');
+        setMessage(error.message || 'Email verification failed');
+        
+        toast({
+          title: "Verification Failed",
+          description: error.message || "Unable to verify your email. Please try again.",
+          variant: "destructive",
+        });
       }
     };
 
     verifyEmail();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <div className="w-16 h-16 bg-primary-500 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Bot className="text-white h-8 w-8" />
-            </div>
-            <CardTitle className="text-2xl">Verifying Your Account</CardTitle>
-          </CardHeader>
-          <CardContent className="text-center">
-            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
-            <p className="text-slate-600">Please wait while we verify your email address...</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (verified) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle className="text-white h-8 w-8" />
-            </div>
-            <CardTitle className="text-2xl text-green-600">Email Verified!</CardTitle>
-          </CardHeader>
-          <CardContent className="text-center space-y-4">
-            <p className="text-slate-600">
-              Your account has been successfully activated! You can now log in to FlowMindAI.
-            </p>
-            <Alert>
-              <CheckCircle className="h-4 w-4" />
-              <AlertDescription>
-                Welcome to FlowMindAI! Your account is now ready to use.
-              </AlertDescription>
-            </Alert>
-            <div className="pt-4">
-              <Link href="/login">
-                <Button className="w-full" data-testid="button-go-to-login">
-                  Go to Login
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  }, [navigate, toast]);
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-            <XCircle className="text-white h-8 w-8" />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center space-x-2 mb-4">
+            <Bot className="h-8 w-8 text-blue-600" />
+            <span className="text-2xl font-bold text-gray-900">FlowMindAI</span>
           </div>
-          <CardTitle className="text-2xl text-red-600">Verification Failed</CardTitle>
-        </CardHeader>
-        <CardContent className="text-center space-y-4">
-          <Alert variant="destructive">
-            <XCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-          <p className="text-slate-600">
-            The verification link may be invalid or expired. Please try registering again or request a new verification email.
-          </p>
-          <div className="space-y-2">
-            <Link href="/register">
-              <Button variant="outline" className="w-full" data-testid="button-register-again">
-                Register Again
-              </Button>
-            </Link>
-            <Link href="/login">
-              <Button variant="ghost" className="w-full" data-testid="button-back-to-login">
-                Back to Login
-              </Button>
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Email Verification</h1>
+        </div>
+
+        <Card>
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-4 w-16 h-16 rounded-full flex items-center justify-center">
+              {status === 'loading' && (
+                <div className="bg-blue-100 w-full h-full rounded-full flex items-center justify-center">
+                  <Loader2 className="h-8 w-8 text-blue-600 animate-spin" />
+                </div>
+              )}
+              {status === 'success' && (
+                <div className="bg-green-100 w-full h-full rounded-full flex items-center justify-center">
+                  <CheckCircle className="h-8 w-8 text-green-600" />
+                </div>
+              )}
+              {status === 'error' && (
+                <div className="bg-red-100 w-full h-full rounded-full flex items-center justify-center">
+                  <XCircle className="h-8 w-8 text-red-600" />
+                </div>
+              )}
+            </div>
+            
+            <CardTitle>
+              {status === 'loading' && "Verifying your email..."}
+              {status === 'success' && "Email Verified!"}
+              {status === 'error' && "Verification Failed"}
+            </CardTitle>
+            
+            <CardDescription>
+              {message}
+            </CardDescription>
+          </CardHeader>
+          
+          <CardContent className="text-center">
+            {status === 'success' && (
+              <div className="space-y-4">
+                <p className="text-sm text-gray-600">
+                  You will be redirected to the login page in a few seconds.
+                </p>
+                <Button asChild className="w-full">
+                  <Link href="/login">Sign In Now</Link>
+                </Button>
+              </div>
+            )}
+            
+            {status === 'error' && (
+              <div className="space-y-4">
+                <p className="text-sm text-gray-600">
+                  Having trouble? You can request a new verification email.
+                </p>
+                <div className="flex flex-col space-y-2">
+                  <Button asChild variant="outline">
+                    <Link href="/resend-verification">Resend Verification Email</Link>
+                  </Button>
+                  <Button asChild variant="ghost">
+                    <Link href="/register">Back to Registration</Link>
+                  </Button>
+                </div>
+              </div>
+            )}
+            
+            {status === 'loading' && (
+              <p className="text-sm text-gray-600">
+                Please wait while we verify your email address...
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
