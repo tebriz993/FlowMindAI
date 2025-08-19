@@ -206,7 +206,6 @@ This project is proprietary software developed by Crocusoft MMC.
 
 For support and questions:
 - Email: tabrizl@crocusoft.com
-- Company: Crocusoft MMC
 
 ---
 
